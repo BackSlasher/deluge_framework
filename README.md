@@ -95,3 +95,19 @@ output:
 [+] Finished
 [i] Client disconnected.
 ```
+## Parameters for filter_torrents
+### connection_data
+A dictionary of paramters defining how to connect to the deluge daemon. Unspecified keys get default value. Possible keys:  
++ `host`: Name / IP of the machine running the deluge daemon. Defaults to `localhost`
++ `port`: Port of the deluge daemon. Defaults to `58846`
++ `username`: Username to connect to the deluge daemon. Not needed if running locally on the same user.
++ `password`: Complementing `username`
+
+### info_wanted
+An array of fields to return for every torrent. Possible values:
+`"state", "save_path", "tracker", "next_announce", "name", "total_size", "progress", "num_seeds", "total_seeds", "num_peers", "total_peers", "eta", "download_payload_rate", "upload_payload_rate", "ratio", "distributed_copies", "num_pieces", "piece_length", "piece_info", "total_done", "files"`
+Defaults to nothing
+### action
+Callback for your function. Defaults to listing all torrents
+### interactive
+A boolean, indicating whether to print information to stdout. Defaults to `true`, can be disabled for cronjobs.
