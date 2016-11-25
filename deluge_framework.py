@@ -8,28 +8,26 @@
 ## filter_torrents(connection_data,torrent_info_wanted,action,interactive)
 # see bottom of script for details
 
-from deluge.log import LOG as log
+import logging
 from deluge.ui.client import client
 import deluge.component as component
 from twisted.internet import reactor, defer
 import time
 
+log = logging.getLogger(__name__)
+
 def printSuccess(dresult, is_success, smsg):
-    global is_interactive
-    if is_interactive:
-        if is_success:
-            print "[+]", smsg
-        else:
-            print "[i]", smsg
+    if is_success:
+        log.info("[+] %s", smsg)
+    else:
+        log.info("[i] %s", smsg)
 
 def printError(emsg):
-    global is_interactive
-    if is_interactive:
-        print "[e]", emsg
+    log.error("[e] %s", emsg)
 
 def endSession(esresult):
     if esresult:
-        print esresult
+        log.info(esresult)
         reactor.stop()
     else:
         client.disconnect()
@@ -37,7 +35,6 @@ def endSession(esresult):
         reactor.stop()
 
 def printReport(rresult):
-    
     printSuccess(None, True, "Finished")
     endSession(None)
 
@@ -94,8 +91,15 @@ def filter_torrents(connection_data={},info_wanted=[],action=(lambda tid,tinfo: 
     torrent_info_wanted = info_wanted
     global torrentAction
     torrentAction = action
-    global is_interactive
-    is_interactive = interactive
+    if interactive:
+        # create a handler equivalent to plain printing
+        sh = logging.StreamHandler()
+        sh.setFormatter(logging.Formatter("%(message)s"))
+        log.addHandler(sh)
+        log.setLevel(logging.INFO)
+    else:
+        # use parent loggers, or don't log at all
+        log.addHandler(logging.NullHandler())
     # start the show
     cliconnect.addCallbacks(on_connect_success, endSession, errbackArgs=("Connection failed: check settings and try again."))
     reactor.run()
